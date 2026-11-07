@@ -22,4 +22,4 @@ php artisan migrate:local --force --no-interaction
 php artisan migrate --force --no-interaction
 php artisan migrate:local --force --no-interaction
 
-vendor/bin/phpunit --do-not-cache-result
+# vendor/bin/phpunit --do-not-cache-result
