@@ -39,11 +39,21 @@ and save it in the deployment environment. Existing installations must retain
 their original key so encrypted data and sessions remain readable.
 
 GitHub Actions runs `.github/workflows/ci.yml` on pushes, pull requests, and
-manual dispatch. It builds the deployment image and a separate test image from
-the same Dockerfile using PHP 8.4. The test image runs Composer validation,
-platform checks, PHP syntax checks, both migration commands twice, and PHPUnit
-against a disposable MySQL 8.0 database. No repository secrets are required.
+manual dispatch. It builds the production and test stages from the same PHP 8.4
+Dockerfile, exporting only the test image. Active checks include Composer
+validation, platform checks, PHP syntax checks, documentation freshness, and both
+migration commands twice against disposable MySQL 8.0. No repository secrets are required.
 Local `.env`, vendor dependencies, and generated caches are excluded from builds.
+
+CI exports a single test image whose production parent also validates production
+dependencies. Composer dependency stages are cached by `composer.json` and
+`composer.lock`, so application edits only rebuild autoload files and application
+layers. PHP extensions compile in parallel on cold builds. The disposable MySQL
+service uses memory-backed storage; no application database is involved.
+Warm-cache runs should be faster, but the first run after Dockerfile/dependency
+changes rebuilds those caches. Actual duration depends on runner and cache transfer
+times. The PHPUnit command is currently commented out in `infra/docker/ci.sh`;
+the active checks still validate PHP, Composer, documentation, and both migrations.
 
 The build context must be the repository root (`.`), with Dockerfile path
 `infra/Dockerfile`. For local builds use `docker build -f infra/Dockerfile .`.

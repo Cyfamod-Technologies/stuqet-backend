@@ -28,10 +28,11 @@ jobs:
         ports:
           - 3306:3306
         options: >-
+          --tmpfs /var/lib/mysql:rw
           --health-cmd="mysqladmin ping -h 127.0.0.1 -u root -pci_root_password"
-          --health-interval=10s
+          --health-interval=2s
           --health-timeout=5s
-          --health-retries=12
+          --health-retries=60
 
     steps:
       - uses: actions/checkout@v6
@@ -40,22 +41,7 @@ jobs:
 
       - uses: docker/setup-buildx-action@v4
 
-      - name: Build production image
-        uses: docker/build-push-action@v7
-        with:
-          context: .
-          file: infra/Dockerfile
-          target: runtime
-          push: false
-          load: true
-          tags: stuqet:production
-          cache-from: type=gha,scope=stuqet-production
-          cache-to: type=gha,mode=max,scope=stuqet-production
-
-      - name: Check production dependencies
-        run: docker run --rm stuqet:production composer check-platform-reqs --no-dev
-
-      - name: Build test image
+      - name: Build production and CI stages (single image export)
         uses: docker/build-push-action@v7
         with:
           context: .
@@ -69,7 +55,7 @@ jobs:
             type=gha,scope=stuqet-ci
           cache-to: type=gha,mode=max,scope=stuqet-ci
 
-      - name: Run checks, migrations, and tests
+      - name: Run application checks and migration verification
         run: |
           docker run --name stuqet-ci --network host \
             -e APP_ENV=testing \
