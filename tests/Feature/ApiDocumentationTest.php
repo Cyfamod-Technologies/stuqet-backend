@@ -17,8 +17,8 @@ class ApiDocumentationTest extends TestCase
 
     public function test_docs_assets_are_same_origin_even_when_the_proxy_forwards_http(): void
     {
-        config(['cache.default' => 'array', 'app.url' => 'http://api.stuqet.com', 'app.asset_url' => 'http://api.stuqet.com']);
-        $response = $this->get('http://api.stuqet.com/api/docs');
+        config(['cache.default' => 'array', 'app.url' => 'https://api.stuqet.com', 'app.asset_url' => 'https://api.stuqet.com']);
+        $response = $this->get('https://api.stuqet.com/api/docs');
         $response->assertOk();
         foreach (['vendor/swagger-ui/swagger-ui.css', 'css/mobile-api-docs.css', 'vendor/swagger-ui/swagger-ui-bundle.js', 'js/mobile-api-docs.js', 'favicon-docs.svg'] as $asset) {
             $response->assertSee('"/'.public_asset_path($asset).'"', false);
