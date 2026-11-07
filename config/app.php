@@ -2,6 +2,8 @@
 
 return [
 
+    'web_frontend_status' => env('WEB_FRONTEND_STATUS', 'enable'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Name

@@ -4,6 +4,19 @@ A complete solution for E-commerce Business with exclusive features & super resp
 
 php artisan migrate --path=database/migrations/2026_03_31_000001_add_business_category_to_shops_table.php
 
+## Web access switch
+
+Set `WEB_FRONTEND_STATUS=disable` in the application environment to block the
+homepage, storefront, and customer/seller/delivery web dashboards with HTTP 503.
+Set it to `enable` (the default) to restore web access. After changing it, run
+`php artisan config:clear`, or rebuild the configuration cache during deployment.
+
+Admin routes remain protected by their existing authentication and role checks.
+Use `/login` to sign in and `/admin` to access the admin dashboard. Login/logout
+and password-reset routes remain available. Admin/staff upload and category
+helpers and Paystack/Flutterwave web callbacks remain accessible. API endpoints
+and `/api/docs` are unaffected. This switch is independent of `artisan down`.
+
 ## Continuous integration
 
 GitHub Actions runs `.github/workflows/ci.yml` on pushes, pull requests, and
