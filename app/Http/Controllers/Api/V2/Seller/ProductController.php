@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api\V2\Seller;
 
-use App\Http\Requests\ProductRequest;
+use App\Http\Requests\ApiSellerProductRequest;
 use App\Http\Resources\V2\Seller\AttributeCollection;
 use App\Http\Resources\V2\Seller\BrandCollection;
 use Illuminate\Http\Request;
@@ -54,9 +54,18 @@ class ProductController extends Controller
         $this->frequentlyBoughtProductService = $frequentlyBoughtProductService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
+        abort_unless($request->user()->user_type === 'seller', 403);
+        $filters = $request->validate(['listing_type' => 'nullable|in:product,food,service', 'search' => 'nullable|string|max:255']);
         $products = Product::where('user_id', auth()->user()->id)->where('digital', 0)->where('auction_product', 0)->where('wholesale_product', 0)->orderBy('created_at', 'desc');
+        $products->with('stocks');
+        if (!empty($filters['listing_type'])) {
+            $products->where('listing_type', $filters['listing_type']);
+        }
+        if (!empty($filters['search'])) {
+            $products->where('name', 'like', '%'.$filters['search'].'%');
+        }
         $products = $products->paginate(10);
         return new ProductCollection($products);
     }
@@ -96,7 +105,7 @@ class ProductController extends Controller
     }
 
 
-    public function store(ProductRequest $request)
+    public function store(ApiSellerProductRequest $request)
     {
         if (addon_is_activated('seller_subscription')) {
             if (!seller_package_validity_check(auth()->user()->id)) {
@@ -127,7 +136,7 @@ class ProductController extends Controller
 
         //Product Stock
         $this->productStockService->store($request->only([
-            'colors_active', 'colors', 'choice_no', 'unit_price', 'sku', 'current_stock', 'product_id'
+            'colors_active', 'colors', 'choice_no', 'unit_price', 'sku', 'current_stock', 'product_id', 'food_meta'
         ]), $product);
 
         // Frequently Bought Products
@@ -146,6 +155,7 @@ class ProductController extends Controller
 
     public function edit(Request $request, $id)
     {
+        abort_unless($request->user()->user_type === 'seller', 403);
 
         if (auth()->user()->user_type != 'seller') {
             return $this->failed(translate('Unauthenticated User.'));
@@ -161,8 +171,9 @@ class ProductController extends Controller
         return new ProductDetailsCollection($product);
     }
 
-    public function update(ProductRequest $request, Product $product)
+    public function update(ApiSellerProductRequest $request, Product $product)
     {
+        abort_unless((int) $product->user_id === (int) $request->user()->id, 404);
         //Product
         $product = $this->productService->update($request->except([
             '_token', 'sku', 'choice', 'tax_id', 'tax', 'tax_type', 'flash_deal_id', 'flash_discount', 'flash_discount_type'
@@ -179,7 +190,7 @@ class ProductController extends Controller
 
         //Product Stock
         $this->productStockService->store($request->only([
-            'colors_active', 'colors', 'choice_no', 'unit_price', 'sku', 'current_stock', 'product_id'
+            'colors_active', 'colors', 'choice_no', 'unit_price', 'sku', 'current_stock', 'product_id', 'food_meta'
         ]), $product);
 
         // Frequently Bought Products

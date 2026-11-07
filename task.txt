@@ -1,3 +1,0 @@
-1. lets have everything inside my shop.sql arrange accordingly inside database/migrations folder
-2. implement ci using docker 
-3.  

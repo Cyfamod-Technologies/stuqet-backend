@@ -16,6 +16,48 @@ Local `.env`, vendor dependencies, and generated caches are excluded from builds
 Dokploy can continue using the default Dockerfile target, which excludes test
 dependencies. CI does not publish images or deploy the application.
 
+## Mobile API documentation
+
+Auction and POS routes are temporarily hidden from Swagger; their runtime routes
+remain registered. Active-school lookups are available at `GET /api/v2/schools`
+and `GET /api/v2/schools/{id}`. The school list supports `search`, `page`, and
+`per_page` (1–100, default 20). Seller forms can also use the authenticated
+`GET /api/v2/seller/products/schools` alias. Use the returned `id` as `school_id`.
+School create/edit/delete remain admin dashboard operations.
+
+Open `/api/docs` on the application host for Swagger UI. Download the
+OpenAPI 3.0 specification from `/api/openapi.json` for Postman or mobile tooling.
+The documentation and Swagger UI assets are served by the application.
+
+Use **Authorize** to enter the backend-provided `System-Key`. Log in using
+`POST /api/v2/auth/login` with `login_by`, `email`, `password`, and `user_type`
+(`customer`, `seller`, or `delivery_boy`). Enter the returned `access_token` in
+BearerAuth without the `Bearer` prefix. Optional `App-Language` defaults to `en`.
+The docs do not embed credentials or retain authorization after refresh.
+
+Operations are grouped into Authentication, Customer and shared, Seller,
+Delivery, and Payments, with sidebar filters. The mobile API supports Paystack
+and Flutterwave only; other gateway routes, offline payment submissions, and
+wallet/COD payment submissions are removed. `/api/v2/payment-types` returns only
+enabled Paystack and Flutterwave methods. Web checkout routes are configured separately.
+Missing handlers are listed separately and excluded from executable
+operations. Request fields and literal validation declarations are read from
+controllers and FormRequests; conditional requirements, helper/service inputs,
+and response schemas still need manual contract review. Login, signup, and
+delivery-status requests include explicit examples. Use staging data for
+interactive requests, which call the actual API and can modify records.
+
+After changing routes, controllers, request rules, or documentation generation:
+
+```bash
+php artisan docs:generate
+php artisan docs:generate --check
+```
+
+Commit `resources/docs/openapi.json` with the change. CI checks that it is current.
+Swagger UI 5.32.15 is vendored under `public/vendor/swagger-ui` with its license;
+its configuration follows the [Swagger UI documentation](https://swagger.io/docs/open-source-tools/swagger-ui/usage/configuration/).
+
 ## Database migrations
 
 `migrate` imports `shop.sql` on an empty database and skips the import when
@@ -35,6 +77,48 @@ Both commands can be rerun safely; an incomplete baseline stops the process
 instead of attempting to overwrite existing tables. Docker stops on migration errors.
 
 ## Seller Flow for Food
+
+### Mobile API support
+
+Use the Seller section of `/api/docs`. Food items use the existing product
+create/update endpoints with `listing_type: "food"` and a nested `food_meta`
+object. Swagger includes a complete example and field enums.
+
+| Operation | Endpoint |
+| --- | --- |
+| List food items | `GET /api/v2/seller/products/all?listing_type=food&search=rice` |
+| Create food item | `POST /api/v2/seller/products/add` |
+| Load editor data | `GET /api/v2/seller/products/edit/{id}` |
+| Update full food item | `POST /api/v2/seller/products/update/{product}` |
+| Quick-update availability, stock, or menu visibility | `POST /api/v2/seller/products/food/{id}/availability` |
+| Upload images and obtain upload IDs | `POST /api/v2/seller/file/upload` |
+| Publish/unpublish a menu item | `POST /api/v2/seller/product/change-status` |
+
+Food metadata covers short description, ingredients, days/time slots, limited
+or unlimited stock, sizes, add-ons, combo deals, delivery/pickup/dine-in options,
+prep time, special instructions, automatic availability flags, and manual
+available/sold-out overrides. Dietary labels use `tags: ["vegetarian", "spicy"]`.
+Image fields use upload IDs, not image URLs. Food requires a positive
+`unit_price`; `current_stock` is required for limited stock. `unit` defaults to
+`portion`, `min_qty` to 1, and `button` to `publish`.
+
+The quick-update endpoint accepts partial `food_meta`, `published`, and/or
+`current_stock`, preserves omitted settings, and replaces submitted nested
+arrays. Changing unlimited stock to limited requires an explicit quantity.
+It only updates the authenticated seller's food items. Variant-stock changes
+use the full product editor instead.
+
+Seller list/edit and customer product list/detail responses include `food_meta`
+and `food_availability` (`is_available`, `status`, `timezone`). Availability is
+calculated at request time in the application's timezone. Unpublished items
+are unavailable; manual overrides take priority over enabled stock/time checks.
+Schedules include their start time and exclude their end time, and overnight
+slots belong to their starting day.
+
+This exposes the implemented food configuration to mobile clients. Availability
+is a display status, not new cart/checkout enforcement. Sizes/add-ons/combos are
+configuration records; automatic selection pricing, push/live order tracking,
+and additional food analytics are not implemented by these endpoints.
 
 ### Adding / Managing a Food Item
 

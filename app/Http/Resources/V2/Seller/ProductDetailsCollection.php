@@ -26,6 +26,8 @@ class ProductDetailsCollection extends JsonResource
             "category_ids" => $this->categories()->pluck('category_id')->toArray(),
             "brand_id" => $this->brand_id,
             "listing_type" => $this->listing_type,
+            "food_meta" => $this->food_meta,
+            "food_availability" => app(\App\Support\FoodAvailability::class)->forProduct($this->resource),
             "school_id" => $this->school_id,
             "photos" => new UploadedFileCollection(Upload::whereIn("id", explode(",", $this->photos))->get()),
             "thumbnail_img" => new UploadedFileCollection(Upload::whereIn("id", explode(",", $this->thumbnail_img))->get()),

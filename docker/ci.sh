@@ -15,6 +15,7 @@ fi
 sh -n docker/entrypoint.sh
 
 php artisan package:discover --ansi
+php artisan docs:generate --check
 php artisan migrate --force --no-interaction
 php artisan migrate:local --force --no-interaction
 
