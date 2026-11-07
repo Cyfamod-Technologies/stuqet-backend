@@ -29,9 +29,10 @@ if [ ! -d vendor ]; then
   composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
 fi
 
-# Laravel setup
-echo "🔑 Generating app key..."
-php artisan key:generate || echo "App key already set"
+# Runtime configuration is supplied by Dokploy; no .env file is required.
+php artisan config:clear
+echo "🔑 Checking application key..."
+php infra/docker/check-app-key.php
 
 # echo "🔗 Linking storage..."
 # php artisan storage:link || echo "Storage already linked"

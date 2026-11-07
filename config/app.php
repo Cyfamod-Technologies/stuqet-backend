@@ -3,6 +3,10 @@
 return [
 
     'web_frontend_status' => env('WEB_FRONTEND_STATUS', 'enable'),
+    'force_https' => filter_var(env('FORCE_HTTPS', 'Off'), FILTER_VALIDATE_BOOLEAN),
+    'trusted_proxies' => env('TRUSTED_PROXIES') === '*'
+        ? '*'
+        : array_values(array_filter(array_map('trim', explode(',', (string) env('TRUSTED_PROXIES', ''))))),
 
     /*
     |--------------------------------------------------------------------------

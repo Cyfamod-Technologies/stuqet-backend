@@ -13,6 +13,7 @@ if ! find app bootstrap config database routes tests -type f -name '*.php' -prin
   exit 1
 fi
 sh -n infra/docker/entrypoint.sh
+php infra/docker/check-app-key.php
 
 php artisan package:discover --ansi
 php artisan docs:generate --check
