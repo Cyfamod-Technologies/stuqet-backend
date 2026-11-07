@@ -4,8 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Stuqet · API Reference</title>
-    <link rel="stylesheet" href="{{ asset('vendor/swagger-ui/swagger-ui.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/mobile-api-docs.css') }}">
+    <link rel="icon" type="image/svg+xml" href="{{ '/'.public_asset_path('favicon-docs.svg') }}">
+    <link rel="stylesheet" href="{{ '/'.public_asset_path('vendor/swagger-ui/swagger-ui.css') }}">
+    <link rel="stylesheet" href="{{ '/'.public_asset_path('css/mobile-api-docs.css') }}">
 </head>
 <body>
 <a class="skip-link" href="#reference">Skip to API reference</a>
@@ -25,7 +26,7 @@
     <div class="content">
         <section class="hero" aria-labelledby="page-title">
             <div><p class="eyebrow">BUILD WITH STUQET</p><h1 id="page-title">Your next integration<br>starts here<span>.</span></h1><p class="hero-description">One reference for customer, seller, and delivery apps.<br>Explore endpoints, authenticate, and send your first request.</p><div class="hero-meta"><span>{{ $endpointCount }} endpoints</span><i></i><span>REST API</span><i></i><span>JSON</span></div></div>
-            <div class="code-preview"><div class="code-heading"><span>● ● ●</span> YOUR FIRST REQUEST</div><pre><span class="code-purple">curl</span> <span class="code-green">"{{ url('/api/v2/auth/user') }}"</span> \
+            <div class="code-preview"><div class="code-heading"><span>● ● ●</span> YOUR FIRST REQUEST</div><pre><span class="code-purple">curl</span> <span class="code-green" data-request-url="/api/v2/auth/user">"/api/v2/auth/user"</span> \
   -H <span class="code-green">"Accept: application/json"</span> \
   -H <span class="code-green">"System-Key: YOUR_SYSTEM_KEY"</span> \
   -H <span class="code-green">"Authorization: Bearer YOUR_TOKEN"</span></pre><div class="code-footer"><span class="status-dot"></span> Replace placeholders with your credentials</div></div>
@@ -49,7 +50,7 @@
         <footer><span>stuqet <strong>developers</strong></span><span>Paystack & Flutterwave payments</span></footer>
     </div>
 </main>
-<script src="{{ asset('vendor/swagger-ui/swagger-ui-bundle.js') }}"></script>
-<script src="{{ asset('js/mobile-api-docs.js') }}"></script>
+<script src="{{ '/'.public_asset_path('vendor/swagger-ui/swagger-ui-bundle.js') }}"></script>
+<script src="{{ '/'.public_asset_path('js/mobile-api-docs.js') }}"></script>
 </body>
 </html>
