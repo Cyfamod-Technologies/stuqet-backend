@@ -38,8 +38,8 @@ php artisan key:generate || echo "App key already set"
 
 
 echo "🛠 Running migrations..."
-php artisan migrate --force || echo "Migration failed (likely already run)"
-php artisan migrate:local || echo "local Migration failed (likely already run)"
+php artisan migrate --force
+php artisan migrate:local --force
 
 echo "🌱 Running seeders..."
 php artisan db:seed --force || echo "Seeding skipped or failed"

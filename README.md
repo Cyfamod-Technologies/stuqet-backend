@@ -4,9 +4,23 @@ A complete solution for E-commerce Business with exclusive features & super resp
 
 php artisan migrate --path=database/migrations/2026_03_31_000001_add_business_category_to_shops_table.php
 
-## Run only app-owned migrations and skip vendor package migration paths:
+## Database migrations
 
+`migrate` imports `shop.sql` on an empty database and skips the import when
+the baseline is already present. It does not run application or package migrations.
+`migrate:local` applies the migrations in `database/migrations`, using the same
+migration history to skip completed changes. It also ensures the baseline exists
+first. An explicit `migrate --path=...` runs only the requested migration path.
+
+Run both commands in order (Docker startup does this with `--force`):
+
+```bash
+php artisan migrate
 php artisan migrate:local
+```
+
+Both commands can be rerun safely; an incomplete baseline stops the process
+instead of attempting to overwrite existing tables. Docker stops on migration errors.
 
 ## Seller Flow for Food
 
