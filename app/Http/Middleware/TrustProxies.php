@@ -4,9 +4,17 @@ namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Middleware\TrustProxies as Middleware;
+use Closure;
 
 class TrustProxies extends Middleware
 {
+    public function handle($request, Closure $next)
+    {
+        $this->proxies = config('app.trusted_proxies', []);
+
+        return parent::handle($request, $next);
+    }
+
     /**
      * The trusted proxies for this application.
      *

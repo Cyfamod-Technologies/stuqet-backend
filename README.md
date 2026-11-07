@@ -4,6 +4,18 @@ A complete solution for E-commerce Business with exclusive features & super resp
 
 php artisan migrate --path=database/migrations/2026_03_31_000001_add_business_category_to_shops_table.php
 
+## HTTPS behind Dokploy
+
+Set `APP_URL=https://api.stuqet.com` and `FORCE_HTTPS=On` in the deployed
+environment. URL generation now respects either HTTPS setting even outside
+`APP_ENV=production`, including shared CSS/JS, login forms, and uploaded assets.
+Set `TRUSTED_PROXIES` to your reverse proxy's IP addresses or CIDRs (comma-separated)
+to honor its forwarded protocol/host headers. `*` trusts the connecting proxy
+and should only be used when the application can only be reached through that proxy.
+After changing deployment variables, redeploy or run `php artisan config:clear`
+and `php artisan view:clear`. Keep local development's `APP_URL` on HTTP and
+`FORCE_HTTPS=Off` when running without TLS.
+
 ## Web access switch
 
 Set `WEB_FRONTEND_STATUS=disable` in the application environment to block the
@@ -18,6 +30,13 @@ helpers and Paystack/Flutterwave web callbacks remain accessible. API endpoints
 and `/api/docs` are unaffected. This switch is independent of `artisan down`.
 
 ## Continuous integration
+
+Container startup uses the persistent `APP_KEY` supplied through Dokploy's
+environment and does not generate or overwrite it. A `.env` file inside the
+image is not required. Missing or invalid keys stop startup before migrations.
+For a new installation, generate a key with `php artisan key:generate --show`
+and save it in the deployment environment. Existing installations must retain
+their original key so encrypted data and sessions remain readable.
 
 GitHub Actions runs `.github/workflows/ci.yml` on pushes, pull requests, and
 manual dispatch. It builds the deployment image and a separate test image from

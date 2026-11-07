@@ -22,7 +22,9 @@ class AppServiceProvider extends ServiceProvider
       Schema::defaultStringLength(191);
       Paginator::useBootstrap();
 
-      if ($this->app->environment('production')) {
+      if ($this->app->environment('production')
+          || config('app.force_https')
+          || parse_url((string) config('app.url'), PHP_URL_SCHEME) === 'https') {
           URL::forceScheme('https');
       }
 
