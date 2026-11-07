@@ -6,6 +6,8 @@
     var buttons = document.querySelectorAll('[data-group]');
     var spec, ui;
     var selected = 'All';
+    var exampleUrl = document.querySelector('[data-request-url]');
+    if (exampleUrl) exampleUrl.textContent = JSON.stringify(new URL(exampleUrl.dataset.requestUrl, window.location.origin).href);
     function filteredSpec(group) {
         var document = Object.assign({}, spec, { paths: {} });
         Object.keys(spec.paths).forEach(function (path) {

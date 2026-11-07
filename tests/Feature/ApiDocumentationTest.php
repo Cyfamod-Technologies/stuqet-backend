@@ -15,6 +15,18 @@ class ApiDocumentationTest extends TestCase
         $this->get('/api/openapi.json')->assertOk()->assertHeader('Content-Type', 'application/json');
     }
 
+    public function test_docs_assets_are_same_origin_even_when_the_proxy_forwards_http(): void
+    {
+        config(['cache.default' => 'array', 'app.url' => 'http://api.stuqet.com', 'app.asset_url' => 'http://api.stuqet.com']);
+        $response = $this->get('http://api.stuqet.com/api/docs');
+        $response->assertOk();
+        foreach (['vendor/swagger-ui/swagger-ui.css', 'css/mobile-api-docs.css', 'vendor/swagger-ui/swagger-ui-bundle.js', 'js/mobile-api-docs.js', 'favicon-docs.svg'] as $asset) {
+            $response->assertSee('"/'.public_asset_path($asset).'"', false);
+            $this->assertFileExists(public_path($asset));
+        }
+        $this->assertDoesNotMatchRegularExpression('/(?:href|src)="http:\/\//', $response->getContent());
+    }
+
     public function test_specification_matches_routes_and_authentication_requirements(): void
     {
         $spec = app(MobileOpenApi::class)->generate(app(Router::class));
