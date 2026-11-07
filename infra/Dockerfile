@@ -49,7 +49,7 @@ COPY . .
 
 
 # Ensure entrypoint script is copied before installing Composer deps
-COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY infra/docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 
@@ -62,9 +62,9 @@ RUN chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
     
 # Copy configuration files
-COPY ./docker/nginx/default.conf /etc/nginx/sites-available/default
-COPY docker/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-COPY docker/php/php.ini /usr/local/etc/php/conf.d/custom.ini
+COPY infra/docker/nginx/default.conf /etc/nginx/sites-available/default
+COPY infra/docker/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY infra/docker/php/php.ini /usr/local/etc/php/conf.d/custom.ini
 
 
 
@@ -78,7 +78,7 @@ CMD ["/usr/local/bin/entrypoint.sh"]
 # CI adds test dependencies without including them in the deployed image.
 FROM production AS ci
 RUN composer install --no-scripts --optimize-autoloader --no-interaction
-CMD ["sh", "docker/ci.sh"]
+CMD ["sh", "infra/docker/ci.sh"]
 
 # Keep an untargeted Docker build suitable for Dokploy deployment.
 FROM production AS runtime

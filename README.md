@@ -26,6 +26,13 @@ platform checks, PHP syntax checks, both migration commands twice, and PHPUnit
 against a disposable MySQL 8.0 database. No repository secrets are required.
 Local `.env`, vendor dependencies, and generated caches are excluded from builds.
 
+The build context must be the repository root (`.`), with Dockerfile path
+`infra/Dockerfile`. For local builds use `docker build -f infra/Dockerfile .`.
+Infrastructure files live under `infra/docker`; the root `.dockerignore` still
+applies. Set Dokploy's Dockerfile path to `infra/Dockerfile` and build path to `.`.
+The deploy workflow defaults to these paths; update any repository variable
+`DOCKERFILE_PATH` that still overrides the path with `Dockerfile`.
+
 Dokploy can continue using the default Dockerfile target, which excludes test
 dependencies. CI does not publish images or deploy the application.
 

@@ -12,7 +12,7 @@ if ! find app bootstrap config database routes tests -type f -name '*.php' -prin
   cat /tmp/php-lint.log
   exit 1
 fi
-sh -n docker/entrypoint.sh
+sh -n infra/docker/entrypoint.sh
 
 php artisan package:discover --ansi
 php artisan docs:generate --check

@@ -44,6 +44,7 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           context: .
+          file: infra/Dockerfile
           target: runtime
           push: false
           load: true
@@ -58,6 +59,7 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           context: .
+          file: infra/Dockerfile
           target: ci
           push: false
           load: true
