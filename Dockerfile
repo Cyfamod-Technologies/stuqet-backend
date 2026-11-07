@@ -1,4 +1,4 @@
-FROM php:8.4-fpm
+FROM php:8.4-fpm AS production
 
 # Install system dependencies and PHP extensions
 RUN apt-get update && apt-get install -y \
@@ -39,7 +39,7 @@ RUN apt-get update && apt-get install -y \
 # ctype, json, openssl, tokenizer, zlib
 
 # Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Set working directory
 WORKDIR /var/www/html
@@ -74,3 +74,11 @@ EXPOSE 80
 # will manage Laravel setup and Supervisor
 # CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
 CMD ["/usr/local/bin/entrypoint.sh"]
+
+# CI adds test dependencies without including them in the deployed image.
+FROM production AS ci
+RUN composer install --no-scripts --optimize-autoloader --no-interaction
+CMD ["sh", "docker/ci.sh"]
+
+# Keep an untargeted Docker build suitable for Dokploy deployment.
+FROM production AS runtime

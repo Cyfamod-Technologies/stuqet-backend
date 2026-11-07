@@ -4,6 +4,18 @@ A complete solution for E-commerce Business with exclusive features & super resp
 
 php artisan migrate --path=database/migrations/2026_03_31_000001_add_business_category_to_shops_table.php
 
+## Continuous integration
+
+GitHub Actions runs `.github/workflows/ci.yml` on pushes, pull requests, and
+manual dispatch. It builds the deployment image and a separate test image from
+the same Dockerfile using PHP 8.4. The test image runs Composer validation,
+platform checks, PHP syntax checks, both migration commands twice, and PHPUnit
+against a disposable MySQL 8.0 database. No repository secrets are required.
+Local `.env`, vendor dependencies, and generated caches are excluded from builds.
+
+Dokploy can continue using the default Dockerfile target, which excludes test
+dependencies. CI does not publish images or deploy the application.
+
 ## Database migrations
 
 `migrate` imports `shop.sql` on an empty database and skips the import when
