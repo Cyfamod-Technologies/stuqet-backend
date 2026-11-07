@@ -40,6 +40,8 @@ class RouteServiceProvider extends ServiceProvider
    */
   public function map()
   {
+    Route::middleware('throttle:60,1')->group(base_path('routes/documentation.php'));
+
     $this->mapApiRoutes();
 
     $this->mapApiSellerRoutes();

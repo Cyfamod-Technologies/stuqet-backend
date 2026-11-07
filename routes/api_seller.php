@@ -8,6 +8,10 @@ Route::group(['prefix' => 'v2/seller', 'middleware' => ['app_language']], functi
 
     Route::middleware(['auth:sanctum'])->group(function () {
 
+        Route::get('products/schools', [\App\Http\Controllers\Api\V2\SchoolController::class, 'index']);
+
+        Route::post('products/food/{id}/availability', [FoodProductController::class, 'updateAvailability']);
+
         //Order Section
         Route::controller(OrderController::class)->group(function () {
             Route::get('orders', 'getOrderList');
@@ -130,7 +134,6 @@ Route::group(['prefix' => 'v2/seller', 'middleware' => ['app_language']], functi
         //Seller Package 
         Route::controller(SellerPackageController::class)->group(function () {
             Route::get('seller-packages-list', 'seller_packages_list');
-            Route::post('seller-package/offline-payment', 'purchase_package_offline');
             Route::post('seller-package/free-package', 'purchase_free_package');
         });
 

@@ -402,7 +402,7 @@ class ProductService
         return $product;
     }
 
-    protected function normalizeFoodMeta($foodMeta, $listingType)
+    public function normalizeFoodMeta($foodMeta, $listingType)
     {
         if ($listingType !== 'food') {
             return null;

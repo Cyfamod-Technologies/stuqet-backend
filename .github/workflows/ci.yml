@@ -1,0 +1,101 @@
+name: Docker CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  docker-ci:
+    name: Build and test PHP 8.4
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: stuqet_ci
+          MYSQL_USER: stuqet_ci
+          MYSQL_PASSWORD: ci_password
+          MYSQL_ROOT_PASSWORD: ci_root_password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -u root -pci_root_password"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=12
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - uses: docker/setup-buildx-action@v4
+
+      - name: Build production image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: infra/Dockerfile
+          target: runtime
+          push: false
+          load: true
+          tags: stuqet:production
+          cache-from: type=gha,scope=stuqet-production
+          cache-to: type=gha,mode=max,scope=stuqet-production
+
+      - name: Check production dependencies
+        run: docker run --rm stuqet:production composer check-platform-reqs --no-dev
+
+      - name: Build test image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: infra/Dockerfile
+          target: ci
+          push: false
+          load: true
+          tags: stuqet:ci
+          cache-from: |
+            type=gha,scope=stuqet-production
+            type=gha,scope=stuqet-ci
+          cache-to: type=gha,mode=max,scope=stuqet-ci
+
+      - name: Run checks, migrations, and tests
+        run: |
+          docker run --name stuqet-ci --network host \
+            -e APP_ENV=testing \
+            -e APP_KEY=base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA= \
+            -e APP_DEBUG=false \
+            -e APP_URL=http://localhost \
+            -e DB_CONNECTION=mysql \
+            -e DB_HOST=127.0.0.1 \
+            -e DB_PORT=3306 \
+            -e DB_DATABASE=stuqet_ci \
+            -e DB_USERNAME=stuqet_ci \
+            -e DB_PASSWORD=ci_password \
+            -e CACHE_DRIVER=array \
+            -e SESSION_DRIVER=array \
+            -e QUEUE_CONNECTION=sync \
+            -e MAIL_MAILER=array \
+            stuqet:ci
+
+      - name: Print application logs on failure
+        if: failure()
+        run: |
+          if docker container inspect stuqet-ci >/dev/null 2>&1; then
+            docker cp stuqet-ci:/var/www/html/storage/logs ./ci-logs
+            find ci-logs -type f -name '*.log' -exec tail -n 100 {} \;
+          fi
+
+      - name: Clean up test container
+        if: always()
+        run: docker rm -f stuqet-ci || true
